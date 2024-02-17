@@ -1,5 +1,4 @@
 let player;
-
 const emitter = mitt();
 
 function initPlayer(videoId) {

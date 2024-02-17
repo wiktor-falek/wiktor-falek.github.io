@@ -12,7 +12,7 @@ async function loadPlaylist() {
   const playlistUrlOrPlaylistId = playlistInput.value;
   console.log(playlistUrlOrPlaylistId);
 
-  // TODO: retrieve from the constiable above if is a url
+  // TODO: retrieve from the variable above if is a url
   const playlistId = "PLc39W8Ei8TbFHOXAK1Oa_VV59AGL9DZzd";
 
   async function fetchPlaylistRecursively(nextPageToken) {
