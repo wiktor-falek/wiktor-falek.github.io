@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Youtube Shuffle Player</title>
+    <link rel="stylesheet" href="./index.css" />
+    <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
+    <script src="https://www.youtube.com/iframe_api" defer></script>
+    <script src="./yt-iframe.js" defer></script>
+    <script src="./yt-api.js" defer></script>
+    <script src="./main.js" defer></script>
+  </head>
+  <body>
+    <label for="playlist-input"></label>
+    <input
+      id="playlist-input"
+      type="text"
+      placeholder="Link to playlist or playlist ID"
+      value="https://www.youtube.com/playlist?list=PLc39W8Ei8TbFHOXAK1Oa_VV59AGL9DZzd"
+    />
+    <button onclick="loadPlaylist()">Add Playlist</button>
+
+    <!-- iframe will replace this div -->
+    <div id="player"></div>
+
+    <div id="playback-queue"></div>
+  </body>
+</html>
