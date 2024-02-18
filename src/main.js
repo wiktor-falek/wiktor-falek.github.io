@@ -4,16 +4,48 @@ const playbackQueueElement = document.getElementById("playback-queue");
 if (!playlistInput) throw new Error("#playlist-input element not found");
 if (!playbackQueueElement) throw new Error("#playback-queue element not found");
 
-const playbackQueue = [];
+let playbackQueue = [];
 let currentVideoIndex;
+let initialVideoIndex = 0;
+
 let hasStartedPlaying = false;
+function startPlayback(index) {
+  if (!hasStartedPlaying) {
+    loadVideoById(playbackQueue[index].videoId);
+    currentVideoIndex = index;
+    hasStartedPlaying = true;
+  }
+}
 
 async function loadPlaylist() {
   const playlistUrlOrPlaylistId = playlistInput.value;
-  console.log(playlistUrlOrPlaylistId);
+  let playlistId;
 
-  // TODO: retrieve from the variable above if is a url
-  const playlistId = "PLc39W8Ei8TbFHOXAK1Oa_VV59AGL9DZzd";
+  if (playlistUrlOrPlaylistId.startsWith("PL")) {
+    playlistId = playlistUrlOrPlaylistId;
+  } else {
+    try {
+      const url = new URL(playlistUrlOrPlaylistId);
+      const id = url.searchParams.get("list");
+
+      if (!id) {
+        alert("Invalid url, please input the playlist url");
+        return;
+      }
+
+      playlistId = id;
+
+      if (!hasStartedPlaying) {
+        const index = parseInt(url.searchParams.get("index"));
+        if (!Number.isNaN(index)) {
+          initialVideoIndex = index - 1; // offset 1 based indexing youtube uses
+        }
+      }
+    } catch (e) {
+      alert("Invalid playlist url", e);
+      return;
+    }
+  }
 
   async function fetchPlaylistRecursively(nextPageToken) {
     try {
@@ -28,10 +60,8 @@ async function loadPlaylist() {
         });
       }
 
-      if (!hasStartedPlaying) {
-        loadVideoById(playbackQueue[0].videoId);
-        currentVideoIndex = 0;
-        hasStartedPlaying = true;
+      if (initialVideoIndex <= playbackQueue.length) {
+        startPlayback(initialVideoIndex);
       }
 
       if (data.nextPageToken) {
@@ -44,6 +74,9 @@ async function loadPlaylist() {
   }
 
   await fetchPlaylistRecursively();
+
+  // if hasn't started already due to index being out of bounds
+  startPlayback(0);
 
   console.log(playbackQueue);
 }
