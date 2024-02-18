@@ -5,16 +5,13 @@ if (!playlistInput) throw new Error("#playlist-input element not found");
 if (!playbackQueueElement) throw new Error("#playback-queue element not found");
 
 let playbackQueue = [];
-let currentVideoIndex;
+let hasStartedPlaying = false;
 let initialVideoIndex = 0;
 
-let hasStartedPlaying = false;
+let currentVideoIndex;
 function startPlayback(index) {
-  if (!hasStartedPlaying) {
-    loadVideoById(playbackQueue[index].videoId);
-    currentVideoIndex = index;
-    hasStartedPlaying = true;
-  }
+  loadVideoById(playbackQueue[index].videoId);
+  currentVideoIndex = index;
 }
 
 async function loadPlaylist() {
@@ -60,8 +57,9 @@ async function loadPlaylist() {
         });
       }
 
-      if (initialVideoIndex <= playbackQueue.length) {
+      if (!hasStartedPlaying && initialVideoIndex <= playbackQueue.length) {
         startPlayback(initialVideoIndex);
+        hasStartedPlaying = true;
       }
 
       if (data.nextPageToken) {
@@ -75,15 +73,33 @@ async function loadPlaylist() {
 
   await fetchPlaylistRecursively();
 
-  // if hasn't started already due to index being out of bounds
-  startPlayback(0);
+  if (!hasStartedPlaying) {
+    startPlayback(0);
+    hasStartedPlaying = true;
+  }
 
   console.log(playbackQueue);
 }
 
+function previousTrack() {
+  if (currentVideoIndex === 0) {
+    return;
+  }
+
+  startPlayback(--currentVideoIndex);
+}
+
+function nextTrack() {
+  if (currentVideoIndex + 1 > playbackQueue.length) {
+    return;
+  }
+
+  startPlayback(++currentVideoIndex);
+}
+
 emitter.on("video-ended", () => {
   if (currentVideoIndex <= playbackQueue.length) {
-    const nextVideo = playbackQueue[currentVideoIndex++];
+    const nextVideo = playbackQueue[++currentVideoIndex];
     loadVideoById(nextVideo.videoId);
   }
 });

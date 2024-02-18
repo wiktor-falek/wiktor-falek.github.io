@@ -2,11 +2,11 @@ let player;
 const emitter = mitt();
 
 function initPlayer(videoId) {
-  player = new YT.Player("player", {
+  const player = new YT.Player("player", {
     height: "390",
     width: "640",
     videoId,
-    playerconsts: {
+    playerVars: {
       playsinline: 0,
       rel: 0,
     },
@@ -15,6 +15,8 @@ function initPlayer(videoId) {
       onStateChange: onPlayerStateChange,
     },
   });
+
+  return player;
 }
 
 function onYouTubeIframeAPIReady() {}
@@ -31,4 +33,16 @@ function onPlayerStateChange(event) {
 
 function stopVideo() {
   player.stopVideo();
+}
+
+function loadVideoById(videoId) {
+  if (!player) {
+    player = initPlayer(videoId);
+  } else {
+    try {
+      player.loadVideoById(videoId);
+    } catch {
+      // throws player.loadVideoById is not a function in firefox, but works anyways
+    }
+  }
 }

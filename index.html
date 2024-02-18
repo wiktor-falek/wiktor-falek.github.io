@@ -6,9 +6,9 @@
     <title>Youtube Shuffle Player</title>
     <link rel="stylesheet" href="./src/index.css" />
     <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
-    <script src="https://www.youtube.com/iframe_api" defer></script>
-    <script src="./src/yt-iframe.js" defer></script>
-    <script src="./src/yt-api.js" defer></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="./src/yt-iframe.js"></script>
+    <script src="./src/yt-api.js"></script>
     <script src="./src/main.js" defer></script>
   </head>
   <body>
@@ -23,6 +23,13 @@
 
     <!-- iframe will replace this div -->
     <div id="player"></div>
+
+    <div class="buttons">
+      <button id="previous-track-button" onclick="previousTrack()">
+        Previous
+      </button>
+      <button id="next-track-button" onclick="nextTrack()">Next</button>
+    </div>
 
     <div id="playback-queue"></div>
   </body>
