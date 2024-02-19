@@ -52,7 +52,7 @@ export async function fetchPlaylistById(
   const { nextPageToken, pageInfo } = data;
 
   const items = data.items.map((item) => ({
-    id: item.id,
+    videoId: item.id,
     title: item.snippet.title,
     thumbnails: item.thumbnails,
   }));

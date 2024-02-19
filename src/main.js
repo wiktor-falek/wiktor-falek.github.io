@@ -1,18 +1,16 @@
-const playlistInput = document.getElementById("playlist-input");
-const playbackQueueElement = document.getElementById("playback-queue");
+const playlistInput = document.querySelector("#playlist-input");
+const playbackQueueElement = document.querySelector("#playback-queue");
+const currentlyPlayingParagraph = document.querySelector("#currently-playing");
 
 if (!playlistInput) throw new Error("#playlist-input element not found");
 if (!playbackQueueElement) throw new Error("#playback-queue element not found");
+if (!playbackQueueElement)
+  throw new Error("#currently-playing element not found");
 
-let playbackQueue = [];
+let playbackQueue = createPlaybackQueue();
 let hasStartedPlaying = false;
 let initialVideoIndex = 0;
-
-let currentVideoIndex;
-function startPlayback(index) {
-  loadVideoById(playbackQueue[index].videoId);
-  currentVideoIndex = index;
-}
+let currentVideoIndex = 0;
 
 async function loadPlaylist() {
   const playlistUrlOrPlaylistId = playlistInput.value;
@@ -35,7 +33,7 @@ async function loadPlaylist() {
       if (!hasStartedPlaying) {
         const index = parseInt(url.searchParams.get("index"));
         if (!Number.isNaN(index)) {
-          initialVideoIndex = index - 1; // offset 1 based indexing youtube uses
+          initialVideoIndex = index - 1; // offset 1 based indexing that youtube uses
         }
       }
     } catch (e) {
@@ -44,17 +42,20 @@ async function loadPlaylist() {
     }
   }
 
-  async function fetchPlaylistRecursively(nextPageToken) {
+  let nextPageToken;
+
+  do {
     try {
       const res = await fetchPlaylistById(playlistId, nextPageToken);
       const data = await res.json();
 
       for (let i = 0; i < data.items.length; i++) {
-        const video = data.items[i];
-        playbackQueue.push({
-          title: video.snippet.title,
-          videoId: video.snippet.resourceId.videoId,
-        });
+        const item = data.items[i];
+        const video = {
+          title: item.snippet.title,
+          videoId: item.snippet.resourceId.videoId,
+        };
+        playbackQueue.push(video);
       }
 
       if (!hasStartedPlaying && initialVideoIndex <= playbackQueue.length) {
@@ -62,39 +63,56 @@ async function loadPlaylist() {
         hasStartedPlaying = true;
       }
 
-      if (data.nextPageToken) {
-        await fetchPlaylistRecursively(data.nextPageToken);
-      }
+      nextPageToken = data.nextPageToken;
     } catch (e) {
       console.error(e);
-      alert("Failed to fetch the playlist:", e);
+      alert("Failed to fetch videos");
     }
-  }
-
-  await fetchPlaylistRecursively();
+  } while (nextPageToken);
 
   if (!hasStartedPlaying) {
     startPlayback(0);
     hasStartedPlaying = true;
   }
+}
 
-  console.log(playbackQueue);
+function startPlayback(index) {
+  const { videoId, title } = playbackQueue[currentVideoIndex];
+  loadVideoById(videoId);
+  currentVideoIndex = index;
+
+  // update DOM
+  currentlyPlayingParagraph.innerHTML = title;
+
+  const allPlaybackQueueElementLi = document.querySelectorAll(
+    "#playback-queue-elements li"
+  );
+
+  for (let i = 0; i < allPlaybackQueueElementLi.length; i++) {
+    allPlaybackQueueElementLi[i].classList.remove("selected");
+  }
+
+  const playbackQueueElementLi = document.querySelector(
+    `#playback-queue-elements li[index="${index}"]`
+  );
+  if (playbackQueueElementLi === null) {
+    console.error(
+      "#playback-queue-elements li[index=${index}] element not found"
+    );
+  }
+  playbackQueueElementLi.classList.add("selected");
 }
 
 function previousTrack() {
-  if (currentVideoIndex === 0) {
-    return;
+  if (currentVideoIndex > 0) {
+    startPlayback(--currentVideoIndex);
   }
-
-  startPlayback(--currentVideoIndex);
 }
 
 function nextTrack() {
-  if (currentVideoIndex + 1 > playbackQueue.length) {
-    return;
+  if (currentVideoIndex + 1 < playbackQueue.length) {
+    startPlayback(++currentVideoIndex);
   }
-
-  startPlayback(++currentVideoIndex);
 }
 
 emitter.on("video-ended", () => {

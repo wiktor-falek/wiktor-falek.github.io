@@ -7,8 +7,10 @@ function initPlayer(videoId) {
     width: "640",
     videoId,
     playerVars: {
+      // https://developers.google.com/youtube/player_parameters#Parameters
       playsinline: 0,
       rel: 0,
+      fs: 0,
     },
     events: {
       onReady: onPlayerReady,
