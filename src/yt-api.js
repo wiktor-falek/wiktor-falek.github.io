@@ -17,3 +17,13 @@ function fetchPlaylistById(id, pageToken) {
 
   return fetch(url);
 }
+
+// function fetchPlaylistById(playlistId, pageToken) {
+//   let url = `http://localhost:3000/playlist/${playlistId}`;
+
+//   if (pageToken) {
+//     url += `&pageToken=${pageToken}`;
+//   }
+
+//   return fetch(url);
+// }

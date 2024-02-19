@@ -12,7 +12,7 @@ app.get("/playlist/:playlistId", async (req, res) => {
       playlistId: z.string().length(34),
     }),
     query: z.object({
-      paginationToken: z.string().optional(),
+      pageToken: z.string().optional(),
     }),
   });
 
@@ -26,10 +26,10 @@ app.get("/playlist/:playlistId", async (req, res) => {
   }
 
   const { playlistId } = validation.data.params;
-  const { paginationToken } = validation.data.query;
+  const { pageToken } = validation.data.query;
 
   try {
-    const playlist = await fetchPlaylistById(playlistId, paginationToken);
+    const playlist = await fetchPlaylistById(playlistId, pageToken);
     res.status(200).send(playlist);
   } catch (e) {
     res.status(400).send(e);
