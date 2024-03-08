@@ -4,6 +4,7 @@ const playbackQueueDiv = document.querySelector("#playback-queue");
 const playbackQueueElementsUl = document.querySelector(
   "#playback-queue #playback-queue-elements"
 );
+const buttonsDiv = document.querySelector("#buttons");
 
 if (!playlistInput) throw new Error("#playlist-input element not found");
 if (!playbackQueueDiv) throw new Error("#playback-queue element not found");
@@ -11,6 +12,14 @@ if (!currentlyPlayingParagraph)
   throw new Error("#currently-playing element not found");
 if (!playbackQueueElementsUl)
   throw new Error("#playback-queue #playback-queue-elements element not found");
+if (!buttonsDiv) throw new Error("#buttons element not found");
+
+const emitter = mitt();
+let player;
+let playbackQueue = [];
+let hasStartedPlaying = false;
+let initialVideoIndex = 0;
+let currentVideoIndex = 0;
 
 function fetchPlaylistById(id, pageToken) {
   const API_KEY = "AIzaSyBehvx8ERKdta2wcbiN7srAIWsTeAwoDkw";
@@ -58,7 +67,6 @@ function initPlayer(videoId) {
 function loadVideoById(videoId) {
   if (!player) {
     player = initPlayer(videoId);
-    const buttonsDiv = document.querySelector(".buttons");
     buttonsDiv.classList.remove("hidden");
   } else {
     try {
@@ -68,13 +76,6 @@ function loadVideoById(videoId) {
     }
   }
 }
-
-const emitter = mitt();
-let player;
-let playbackQueue = [];
-let hasStartedPlaying = false;
-let initialVideoIndex = 0;
-let currentVideoIndex = 0;
 
 async function loadPlaylist() {
   const playlistUrlOrPlaylistId = playlistInput.value;
