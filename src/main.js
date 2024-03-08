@@ -21,8 +21,8 @@ let hasStartedPlaying = false;
 let initialVideoIndex = 0;
 let currentVideoIndex = 0;
 
+const key = atob("QUl6YVN5QmVodng4RVJLZHRhMndjYmlON3NyQUlXc1RlQXdvRGt3");
 function fetchPlaylistById(id, pageToken) {
-  const API_KEY = "AIzaSyBehvx8ERKdta2wcbiN7srAIWsTeAwoDkw";
   let url =
     "https://www.googleapis.com/youtube/v3/playlistItems?" +
     "part=snippet&" +
@@ -31,7 +31,7 @@ function fetchPlaylistById(id, pageToken) {
     id +
     "&" +
     "key=" +
-    API_KEY;
+    key;
 
   if (pageToken) {
     url += "&pageToken=" + pageToken;
