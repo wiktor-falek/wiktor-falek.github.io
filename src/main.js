@@ -1,13 +1,77 @@
 const playlistInput = document.querySelector("#playlist-input");
-const playbackQueueElement = document.querySelector("#playback-queue");
 const currentlyPlayingParagraph = document.querySelector("#currently-playing");
+const playbackQueueDiv = document.querySelector("#playback-queue");
+const playbackQueueElementsUl = document.querySelector(
+  "#playback-queue #playback-queue-elements"
+);
 
 if (!playlistInput) throw new Error("#playlist-input element not found");
-if (!playbackQueueElement) throw new Error("#playback-queue element not found");
-if (!playbackQueueElement)
+if (!playbackQueueDiv) throw new Error("#playback-queue element not found");
+if (!currentlyPlayingParagraph)
   throw new Error("#currently-playing element not found");
+if (!playbackQueueElementsUl)
+  throw new Error("#playback-queue #playback-queue-elements element not found");
 
-let playbackQueue = createPlaybackQueue();
+function fetchPlaylistById(id, pageToken) {
+  const API_KEY = "AIzaSyBehvx8ERKdta2wcbiN7srAIWsTeAwoDkw";
+  let url =
+    "https://www.googleapis.com/youtube/v3/playlistItems?" +
+    "part=snippet&" +
+    "maxResults=50&" +
+    "playlistId=" +
+    id +
+    "&" +
+    "key=" +
+    API_KEY;
+
+  if (pageToken) {
+    url += "&pageToken=" + pageToken;
+  }
+
+  return fetch(url);
+}
+
+function initPlayer(videoId) {
+  const player = new YT.Player("player", {
+    height: "390",
+    width: "640",
+    videoId,
+    playerVars: {
+      // https://developers.google.com/youtube/player_parameters#Parameters
+      playsinline: 0,
+      rel: 0,
+      fs: 0,
+    },
+    events: {
+      onReady: (event) => event.target.playVideo(),
+      onStateChange: (event) => {
+        if (event.data == YT.PlayerState.ENDED) {
+          emitter.emit("video-ended");
+        }
+      },
+    },
+  });
+
+  return player;
+}
+
+function loadVideoById(videoId) {
+  if (!player) {
+    player = initPlayer(videoId);
+    const buttonsDiv = document.querySelector(".buttons");
+    buttonsDiv.classList.remove("hidden");
+  } else {
+    try {
+      player.loadVideoById(videoId);
+    } catch {
+      // throws player.loadVideoById is not a function in firefox, but works anyways
+    }
+  }
+}
+
+const emitter = mitt();
+let player;
+let playbackQueue = [];
 let hasStartedPlaying = false;
 let initialVideoIndex = 0;
 let currentVideoIndex = 0;
@@ -56,6 +120,26 @@ async function loadPlaylist() {
           videoId: item.snippet.resourceId.videoId,
         };
         playbackQueue.push(video);
+
+        const index = playbackQueue.length - 1;
+
+        // update dom
+        const playbackQueueElementLi = document.createElement("li");
+
+        const queueElementText =
+          (index + 1).toString().padStart(4, "0") + " - " + video.title;
+        playbackQueueElementLi.innerText = queueElementText;
+
+        playbackQueueElementLi.setAttribute("index", index.toString());
+        playbackQueueElementLi.addEventListener("click", (e) => {
+          const index = parseInt(e.target?.getAttribute("index"));
+          if (!Number.isNaN(index)) {
+            startPlayback(index);
+          }
+          currentVideoIndex = index;
+        });
+
+        playbackQueueElementsUl.appendChild(playbackQueueElementLi);
       }
 
       if (!hasStartedPlaying && initialVideoIndex <= playbackQueue.length) {
@@ -77,41 +161,36 @@ async function loadPlaylist() {
 }
 
 function startPlayback(index) {
-  const { videoId, title } = playbackQueue[currentVideoIndex];
-  loadVideoById(videoId);
+  const previousVideoIndex = currentVideoIndex;
   currentVideoIndex = index;
+
+  const { videoId, title } = playbackQueue[index];
+  loadVideoById(videoId);
 
   // update DOM
   currentlyPlayingParagraph.innerHTML = title;
 
-  const allPlaybackQueueElementLi = document.querySelectorAll(
-    "#playback-queue-elements li"
+  const previouslySelectedPlaybackQueueElementLi = document.querySelector(
+    `#playback-queue-elements li[index="${previousVideoIndex}"]`
   );
-
-  for (let i = 0; i < allPlaybackQueueElementLi.length; i++) {
-    allPlaybackQueueElementLi[i].classList.remove("selected");
-  }
+  previouslySelectedPlaybackQueueElementLi.classList.remove("selected");
 
   const playbackQueueElementLi = document.querySelector(
     `#playback-queue-elements li[index="${index}"]`
   );
-  if (playbackQueueElementLi === null) {
-    console.error(
-      "#playback-queue-elements li[index=${index}] element not found"
-    );
-  }
+
   playbackQueueElementLi.classList.add("selected");
 }
 
 function previousTrack() {
   if (currentVideoIndex > 0) {
-    startPlayback(--currentVideoIndex);
+    startPlayback(currentVideoIndex - 1);
   }
 }
 
 function nextTrack() {
   if (currentVideoIndex + 1 < playbackQueue.length) {
-    startPlayback(++currentVideoIndex);
+    startPlayback(currentVideoIndex + 1);
   }
 }
 

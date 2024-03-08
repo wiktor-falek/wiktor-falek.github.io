@@ -7,9 +7,6 @@
     <link rel="stylesheet" href="./src/index.css" />
     <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="./src/ytIframe.js"></script>
-    <script src="./src/ytApi.js"></script>
-    <script src="./src/playbackQueue.js"></script>
     <script src="./src/main.js" defer></script>
   </head>
   <body>
@@ -22,20 +19,26 @@
     />
     <button onclick="loadPlaylist()">Add Playlist</button>
 
-    <!-- iframe will replace this div -->
-    <div id="player"></div>
+    <div class="flex">
+      <!-- iframe will replace this div -->
+      <div class="left">
+        <div id="player"></div>
 
-    <div class="buttons">
-      <button id="previous-track-button" onclick="previousTrack()">
-        Previous
-      </button>
-      <button id="next-track-button" onclick="nextTrack()">Next</button>
-    </div>
+        <div class="buttons hidden">
+          <button id="previous-track-button" onclick="previousTrack()">
+            Previous
+          </button>
+          <button id="next-track-button" onclick="nextTrack()">Next</button>
+        </div>
 
-    <p id="currently-playing">&nbsp;</p>
+        <p id="currently-playing">&nbsp;</p>
+      </div>
 
-    <div id="playback-queue">
-      <ul id="playback-queue-elements"></ul>
+      <div class="right">
+        <div id="playback-queue">
+          <ul id="playback-queue-elements"></ul>
+        </div>
+      </div>
     </div>
   </body>
 </html>
