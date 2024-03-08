@@ -196,7 +196,6 @@ function nextTrack() {
 
 emitter.on("video-ended", () => {
   if (currentVideoIndex <= playbackQueue.length) {
-    const nextVideo = playbackQueue[++currentVideoIndex];
-    loadVideoById(nextVideo.videoId);
+    nextTrack();
   }
 });
