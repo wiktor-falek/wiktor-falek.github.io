@@ -136,8 +136,8 @@ async function loadPlaylist() {
           const index = parseInt(e.target?.getAttribute("index"));
           if (!Number.isNaN(index)) {
             startPlayback(index);
+            currentVideoIndex = index;
           }
-          currentVideoIndex = index;
         });
 
         playbackQueueElementsUl.appendChild(playbackQueueElementLi);
