@@ -120,6 +120,12 @@ async function loadPlaylist() {
           title: item.snippet.title,
           videoId: item.snippet.resourceId.videoId,
         };
+
+        const UNAVAILABLE_VIDEO_TITLES = ["Deleted video", "Private video"];
+        if (UNAVAILABLE_VIDEO_TITLES.includes(video.title)) {
+          continue;
+        }
+
         playbackQueue.push(video);
 
         const index = playbackQueue.length - 1;
